@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Nouveau projet' if lang=='fr' else 'New Project' }}{% endblock %}
+
+{% block content %}
+<div style="max-width:800px; margin:0 auto;">
+    <div class="page-header">
+        <h1>{{ '✦ Créer un nouveau projet' if lang=='fr' else '✦ Create a new project' }}</h1>
+        <p>{{ 'Remplissez les informations ci-dessous.' if lang=='fr' else 'Fill in the information below.' }}</p>
+    </div>
+
+    <div style="background:#fff; border-radius:16px; border:1px solid #E8E8E8;
+                overflow:hidden; box-shadow:0 2px 12px rgba(0,0,0,0.06);">
+
+        <!-- En-tête coloré -->
+        <div style="background:linear-gradient(135deg,#141414,#2A2A2A);
+                    padding:24px 32px; display:flex; align-items:center; gap:14px;">
+            <div style="width:44px; height:44px; background:rgba(201,168,76,0.2);
+                        border-radius:10px; display:flex; align-items:center;
+                        justify-content:center; border:1px solid rgba(201,168,76,0.3);">
+                <svg width="22" height="22" fill="none" stroke="#C9A84C"
+                     stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+                </svg>
+            </div>
+            <div>
+                <div style="color:#fff; font-weight:600; font-size:1rem;">
+                    {{ 'Nouveau projet académique' if lang=='fr' else 'New academic project' }}
+                </div>
+                <div style="color:#888; font-size:0.78rem; margin-top:2px;">
+                    {{ 'Visible par tous les étudiants inscrits' if lang=='fr' else 'Visible to all registered students' }}
+                </div>
+            </div>
+        </div>
+
+        <!-- Formulaire -->
+        <form method="POST" style="padding:32px;">
+            {{ form.hidden_tag() }}
+
+            <!-- Titre -->
+            <div style="margin-bottom:24px;">
+                <label style="display:block; font-weight:600; font-size:0.875rem;
+                              color:#0A0A0A; margin-bottom:8px;">
+                    {{ '📌 Titre du projet' if lang=='fr' else '📌 Project title' }}
+                    <span style="color:#dc2626;">*</span>
+                </label>
+                {{ form.title(class="form-control",
+                   placeholder="Ex: Système de détection de maladies par IA — édition 2026") }}
+                {% for e in form.title.errors %}
+                <div style="color:#dc2626; font-size:0.78rem; margin-top:4px;">{{ e }}</div>
+                {% endfor %}
+            </div>
+
+            <!-- Domaine + Max étudiants -->
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:24px;">
+                <div>
+                    <label style="display:block; font-weight:600; font-size:0.875rem;
+                                  color:#0A0A0A; margin-bottom:8px;">
+                        {{ '🏷️ Domaine' if lang=='fr' else '🏷️ Domain' }}
+                    </label>
+                    <select name="domain" class="form-select">
+                        <option value="">{{ 'Sélectionner...' if lang=='fr' else 'Select...' }}</option>
+                        {% for d in ['Informatique','Intelligence Artificielle','Génie logiciel',
+                                     'Réseaux et Sécurité','Mobile','Santé','Agriculture intelligente',
+                                     'Environnement','Éducation','Finance','Mathématiques',
+                                     'Physique','Chimie','Architecture','Droit'] %}
+                        <option value="{{ d }}">{{ d }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label style="display:block; font-weight:600; font-size:0.875rem;
+                                  color:#0A0A0A; margin-bottom:8px;">
+                        {{ '👥 Nombre max d\'étudiants' if lang=='fr' else '👥 Max students' }}
+                    </label>
+                    {{ form.max_students(class="form-control", min=1, max=20, value=1) }}
+                </div>
+            </div>
+
+            <!-- Description -->
+            <div style="margin-bottom:24px;">
+                <label style="display:block; font-weight:600; font-size:0.875rem;
+                              color:#0A0A0A; margin-bottom:8px;">
+                    {{ '📝 Description détaillée' if lang=='fr' else '📝 Detailed description' }}
+                    <span style="color:#dc2626;">*</span>
+                </label>
+                {{ form.description(class="form-control", rows=6,
+                   placeholder="Décrivez les objectifs, les tâches attendues, les compétences requises...") }}
+                {% for e in form.description.errors %}
+                <div style="color:#dc2626; font-size:0.78rem; margin-top:4px;">{{ e }}</div>
+                {% endfor %}
+            </div>
+
+            <!-- Statut initial -->
+            <div style="margin-bottom:32px;">
+                <label style="display:block; font-weight:600; font-size:0.875rem;
+                              color:#0A0A0A; margin-bottom:12px;">
+                    {{ '🔖 Statut initial' if lang=='fr' else '🔖 Initial status' }}
+                </label>
+                <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:10px;">
+                    {% for val, label, color, bg, desc in [
+                        ('open',        'Ouvert' if lang=='fr' else 'Open',
+                         '#16a34a','rgba(34,197,94,0.1)',
+                         'Visible et ouvert aux candidatures'),
+                        ('in_progress', 'En cours' if lang=='fr' else 'In Progress',
+                         '#2563eb','rgba(37,99,235,0.1)',
+                         'Projet déjà en cours de réalisation'),
+                        ('completed',   'Terminé' if lang=='fr' else 'Completed',
+                         '#888','rgba(136,136,136,0.1)',
+                         'Projet archivé et terminé'),
+                        ('closed',      'Fermé' if lang=='fr' else 'Closed',
+                         '#dc2626','rgba(239,68,68,0.1)',
+                         'Fermé, plus de candidatures'),
+                    ] %}
+                    <label style="cursor:pointer;">
+                        <input type="radio" name="status" value="{{ val }}"
+                               {% if val=='open' %}checked{% endif %}
+                               style="display:none;"
+                               onchange="updateStatusCards(this)">
+                        <div class="status-card-option" data-val="{{ val }}"
+                             style="border:2px solid {{ '#C9A84C' if val=='open' else '#E8E8E8' }};
+                                    border-radius:10px; padding:14px 12px; text-align:center;
+                                    background:{{ 'rgba(201,168,76,0.06)' if val=='open' else '#fff' }};
+                                    transition:all 0.2s;">
+                            <div style="font-weight:700; font-size:0.85rem; color:{{ color }}; margin-bottom:4px;">
+                                {{ label }}
+                            </div>
+                            <div style="font-size:0.68rem; color:#999; line-height:1.4;">{{ desc }}</div>
+                        </div>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Boutons -->
+            <div style="display:flex; gap:12px; justify-content:flex-end;
+                        padding-top:20px; border-top:1px solid #F0F0F0;">
+                <a href="{{ url_for('main.dashboard') }}"
+                   style="padding:11px 24px; border-radius:8px; border:1.5px solid #E0E0E0;
+                          color:#555; text-decoration:none; font-weight:500; font-size:0.875rem;
+                          transition:all 0.2s;"
+                   onmouseover="this.style.borderColor='#C9A84C';this.style.color='#C9A84C'"
+                   onmouseout="this.style.borderColor='#E0E0E0';this.style.color='#555'">
+                    {{ 'Annuler' if lang=='fr' else 'Cancel' }}
+                </a>
+                <button type="submit" class="btn-gold" style="padding:11px 28px;">
+                    {{ '✓ Publier le projet' if lang=='fr' else '✓ Publish project' }}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function updateStatusCards(radio) {
+    document.querySelectorAll('.status-card-option').forEach(card => {
+        card.style.border = '2px solid #E8E8E8';
+        card.style.background = '#fff';
+    });
+    const selected = document.querySelector(`.status-card-option[data-val="${radio.value}"]`);
+    if (selected) {
+        selected.style.border = '2px solid #C9A84C';
+        selected.style.background = 'rgba(201,168,76,0.06)';
+    }
+}
+document.querySelectorAll('input[name="status"]').forEach(r => {
+    r.addEventListener('change', () => updateStatusCards(r));
+});
+</script>
+{% endblock %}

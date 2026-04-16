@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}GestProjects{% endblock %} — University Of Douala</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --gold: #C9A84C;
+            --gold-light: #E8C96A;
+            --gold-dark: #A07830;
+            --black: #0A0A0A;
+            --dark: #141414;
+            --dark2: #1E1E1E;
+            --dark3: #2A2A2A;
+            --white: #FFFFFF;
+            --gray: #888888;
+            --gray-light: #F5F5F5;
+            --sidebar-width: 240px;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', sans-serif; background: var(--gray-light); color: var(--black); display: flex; min-height: 100vh; }
+        .sidebar { width: var(--sidebar-width); background: var(--dark); min-height: 100vh; position: fixed; top: 0; left: 0; display: flex; flex-direction: column; z-index: 100; transition: transform 0.3s ease; }
+        .sidebar-brand { padding: 28px 24px 20px; border-bottom: 1px solid var(--dark3); }
+        .sidebar-brand .brand-name { font-size: 1.2rem; font-weight: 700; color: var(--gold); }
+        .sidebar-brand .brand-sub { font-size: 0.7rem; color: var(--gray); margin-top: 2px; }
+        .sidebar-nav { padding: 20px 12px; flex: 1; }
+        .sidebar-nav .nav-label { font-size: 0.65rem; font-weight: 600; color: var(--gray); text-transform: uppercase; letter-spacing: 1px; padding: 0 12px; margin-bottom: 8px; margin-top: 16px; }
+        .sidebar-nav a {
+            text-decoration: none !important;
+            color: #AAAAAA !important;
+        }
+        .sidebar-nav a:hover {
+            background: var(--dark3) !important;
+            color: #FFFFFF !important;
+            text-decoration: none !important;
+        }
+        .sidebar-nav a.active {
+            background: linear-gradient(135deg, var(--gold-dark), var(--gold)) !important;
+            color: #FFFFFF !important;
+            text-decoration: none !important;
+        }
+        .sidebar-footer a {
+            text-decoration: none !important;
+        }
+        .sidebar-nav a { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; color: #AAAAAA; text-decoration: none; font-size: 0.875rem; font-weight: 500; transition: all 0.2s ease; margin-bottom: 2px; }
+        .sidebar-nav a:hover { background: var(--dark3); color: var(--white); }
+        .sidebar-nav a.active { background: linear-gradient(135deg, var(--gold-dark), var(--gold)); color: var(--white); }
+        .sidebar-nav a .nav-icon { width: 18px; height: 18px; }
+        .sidebar-footer { padding: 16px 12px; border-top: 1px solid var(--dark3); }
+        .user-info { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; }
+        .user-avatar { width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg, var(--gold-dark), var(--gold)); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.8rem; color: var(--white); flex-shrink: 0; }
+        .user-name { font-size: 0.85rem; font-weight: 600; color: var(--white); }
+        .user-role { font-size: 0.7rem; color: var(--gray); }
+        .main-content { margin-left: var(--sidebar-width); flex: 1; padding: 40px; min-height: 100vh; }
+        .page-wrapper { animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        .card { border: 1px solid #E8E8E8; border-radius: 12px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); transition: transform 0.2s ease, box-shadow 0.2s ease; background: var(--white); }
+        .card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.1); }
+        .stat-card { background: var(--white); border-radius: 12px; padding: 24px; border: 1px solid #E8E8E8; display: flex; align-items: center; gap: 16px; transition: transform 0.2s, box-shadow 0.2s; }
+        .stat-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.08); }
+        .stat-icon { width: 48px; height: 48px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; flex-shrink: 0; }
+        .stat-icon.gold { background: rgba(201,168,76,0.15); }
+        .stat-icon.black { background: rgba(10,10,10,0.08); }
+        .stat-icon.green { background: rgba(34,197,94,0.12); }
+        .stat-icon.blue  { background: rgba(59,130,246,0.12); }
+        .stat-value { font-size: 1.8rem; font-weight: 700; color: var(--black); line-height: 1; }
+        .stat-label { font-size: 0.78rem; color: var(--gray); margin-top: 4px; }
+        .project-card { background: var(--white); border: 1px solid #E8E8E8; border-radius: 14px; padding: 22px; transition: all 0.25s ease; cursor: pointer; text-decoration: none; color: inherit; display: block; }
+        .project-card:hover { border-color: var(--gold); box-shadow: 0 8px 24px rgba(201,168,76,0.15); transform: translateY(-3px); color: inherit; text-decoration: none; }
+        .project-card .domain-badge { font-size: 0.7rem; font-weight: 600; padding: 3px 10px; border-radius: 20px; background: #F0F0F0; color: #555; display: inline-block; margin-bottom: 10px; }
+        .project-card .status-badge { font-size: 0.7rem; font-weight: 600; padding: 3px 10px; border-radius: 20px; margin-left: 6px; }
+        .status-open { background: rgba(34,197,94,0.12); color: #16a34a; }
+        .status-closed { background: rgba(239,68,68,0.12); color: #dc2626; }
+        .status-completed { background: rgba(59,130,246,0.12); color: #2563eb; }
+        .project-card h5 { font-size: 0.95rem; font-weight: 600; margin-bottom: 8px; color: var(--black); line-height: 1.4; }
+        .project-card p { font-size: 0.82rem; color: var(--gray); line-height: 1.5; margin-bottom: 14px; }
+        .project-meta { font-size: 0.75rem; color: #999; display: flex; justify-content: space-between; align-items: center; padding-top: 12px; border-top: 1px solid #F0F0F0; }
+        .btn-gold { background: linear-gradient(135deg, var(--gold-dark), var(--gold)); color: var(--white); border: none; padding: 10px 22px; border-radius: 8px; font-weight: 600; font-size: 0.875rem; transition: all 0.2s; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
+        .btn-gold:hover { box-shadow: 0 4px 14px rgba(201,168,76,0.4); transform: translateY(-1px); color: var(--white); }
+        .btn-outline-gold { background: transparent; color: var(--gold); border: 1.5px solid var(--gold); padding: 9px 22px; border-radius: 8px; font-weight: 600; font-size: 0.875rem; transition: all 0.2s; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
+        .btn-outline-gold:hover { background: var(--gold); color: var(--white); }
+        .form-control, .form-select { border: 1.5px solid #E0E0E0; border-radius: 8px; padding: 10px 14px; font-size: 0.875rem; transition: border-color 0.2s, box-shadow 0.2s; }
+        .form-control:focus, .form-select:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(201,168,76,0.15); outline: none; }
+        .alert { border-radius: 10px; border: none; padding: 12px 18px; font-size: 0.875rem; }
+        .page-header { margin-bottom: 32px; }
+        .page-header h1 { font-size: 1.8rem; font-weight: 700; color: var(--black); }
+        .page-header p { color: var(--gray); font-size: 0.875rem; margin-top: 4px; }
+        .table { font-size: 0.875rem; }
+        .table thead th { background: var(--dark); color: var(--gold); font-weight: 600; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.5px; border: none; padding: 14px 16px; }
+        .table tbody tr { transition: background 0.15s; }
+        .table tbody tr:hover { background: #FAFAFA; }
+        .table td { padding: 14px 16px; vertical-align: middle; border-color: #F0F0F0; }
+        .auth-wrapper { display: flex; min-height: 100vh; width: 100%; }
+        .auth-left { width: 45%; background: var(--dark); display: flex; flex-direction: column; justify-content: center; padding: 60px; }
+        .auth-right { flex: 1; display: flex; align-items: center; justify-content: center; padding: 60px; background: var(--gray-light); }
+        .auth-form-box { width: 100%; max-width: 420px; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #DDD; border-radius: 3px; }
+    </style>
+</head>
+<body>
+
+{% if current_user.is_authenticated %}
+
+    <aside class="sidebar">
+    <!-- Brand -->
+    <div class="sidebar-brand">
+        <div style="display:flex; align-items:center; gap:10px;">
+            <div style="width:32px; height:32px; background:rgba(201,168,76,0.2);
+                        border-radius:8px; display:flex; align-items:center;
+                        justify-content:center; flex-shrink:0;
+                        border:1px solid rgba(201,168,76,0.3);">
+                <svg width="18" height="18" fill="none" stroke="#C9A84C"
+                     stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                          d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5
+                             S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18
+                             7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477
+                             14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13
+                             C19.832 18.477 18.247 18 16.5 18
+                             c-1.746 0-3.332.477-4.5 1.253"/>
+                </svg>
+            </div>
+            <div>
+                <div class="brand-name">GestProjects</div>
+                <div class="brand-sub">
+                    {{ 'Université de Douala' if lang=='fr' else 'University Of Douala' }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="sidebar-nav">
+        <div class="nav-label">Navigation</div>
+
+        <a href="{{ url_for('main.dashboard') }}"
+           class="{% if request.endpoint == 'main.dashboard' %}active{% endif %}"
+           style="text-decoration:none;">
+            <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6z
+                         M14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6z
+                         M4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2z
+                         M14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
+            </svg>
+            {{ 'Tableau de bord' if lang=='fr' else 'Dashboard' }}
+        </a>
+
+        <a href="{{ url_for('main.projects_list') }}"
+           class="{% if request.endpoint == 'main.projects_list' %}active{% endif %}"
+           style="text-decoration:none;">
+            <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6
+                         a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2
+                         m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+            </svg>
+            {{ 'Explorer les projets' if lang=='fr' else 'Browse Projects' }}
+        </a>
+
+        {% if current_user.is_student() %}
+        <a href="{{ url_for('main.my_applications') }}"
+           class="{% if request.endpoint == 'main.my_applications' %}active{% endif %}"
+           style="text-decoration:none;">
+            <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2
+                         h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707
+                         V19a2 2 0 01-2 2z"/>
+            </svg>
+            {{ 'Mes candidatures' if lang=='fr' else 'My Applications' }}
+        </a>
+        {% endif %}
+
+        {% if current_user.is_teacher() %}
+        <a href="{{ url_for('main.create_project') }}"
+           class="{% if request.endpoint == 'main.create_project' %}active{% endif %}"
+           style="text-decoration:none;">
+            <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                      stroke-width="2" d="M12 4v16m8-8H4"/>
+            </svg>
+            {{ 'Nouveau projet' if lang=='fr' else 'New Project' }}
+        </a>
+        {% endif %}
+    </nav>
+
+    <!-- Footer sidebar -->
+    <div class="sidebar-footer">
+
+        <!-- Switcher langue -->
+        <div style="display:flex; gap:6px; margin-bottom:16px;">
+            <a href="{{ url_for('main.set_lang', lang='fr') }}"
+               style="flex:1; text-align:center; padding:7px 6px;
+                      border-radius:8px; font-size:0.75rem; font-weight:600;
+                      text-decoration:none; transition:all 0.2s;
+                      background:{{ 'rgba(201,168,76,0.2)' if lang=='fr' else 'transparent' }};
+                      color:{{ '#C9A84C' if lang=='fr' else '#666' }};
+                      border:1px solid {{ 'rgba(201,168,76,0.4)' if lang=='fr' else '#333' }};">
+                🇫🇷 FR
+            </a>
+            <a href="{{ url_for('main.set_lang', lang='en') }}"
+               style="flex:1; text-align:center; padding:7px 6px;
+                      border-radius:8px; font-size:0.75rem; font-weight:600;
+                      text-decoration:none; transition:all 0.2s;
+                      background:{{ 'rgba(201,168,76,0.2)' if lang=='en' else 'transparent' }};
+                      color:{{ '#C9A84C' if lang=='en' else '#666' }};
+                      border:1px solid {{ 'rgba(201,168,76,0.4)' if lang=='en' else '#333' }};">
+                🇬🇧 EN
+            </a>
+        </div>
+
+        <!-- Infos utilisateur -->
+        <div style="display:flex; align-items:center; gap:10px;
+                    padding:10px 12px; border-radius:10px;
+                    background:rgba(255,255,255,0.04);
+                    border:1px solid rgba(255,255,255,0.06);
+                    margin-bottom:10px;">
+            <div class="user-avatar">
+                {{ current_user.name[0].upper() }}
+            </div>
+            <div style="flex:1; min-width:0;">
+                <div class="user-name" style="white-space:nowrap;
+                     overflow:hidden; text-overflow:ellipsis;">
+                    {{ current_user.name }}
+                </div>
+                <div class="user-role">
+                    {% if current_user.is_teacher() %}
+                        {{ 'Enseignant' if lang=='fr' else 'Teacher' }}
+                    {% else %}
+                        {{ 'Étudiant' if lang=='fr' else 'Student' }}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Déconnexion -->
+        <a href="{{ url_for('auth.logout') }}"
+           style="display:flex; align-items:center; gap:10px;
+                  padding:9px 12px; border-radius:8px; color:#666;
+                  text-decoration:none; font-size:0.8rem; font-weight:500;
+                  transition:all 0.2s; border:1px solid transparent;"
+           onmouseover="this.style.background='rgba(239,68,68,0.08)';
+                        this.style.color='#ef4444';
+                        this.style.borderColor='rgba(239,68,68,0.2)'"
+           onmouseout="this.style.background='transparent';
+                       this.style.color='#666';
+                       this.style.borderColor='transparent'">
+            <svg width="15" height="15" fill="none" stroke="currentColor"
+                 viewBox="0 0 24 24" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                      d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6
+                         a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+            </svg>
+            {{ 'Déconnexion' if lang=='fr' else 'Logout' }}
+        </a>
+    </div>
+</aside>
+
+    <!-- ── Contenu principal ── -->
+    <div class="main-content">
+        <div class="page-wrapper">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show mb-4">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                {% endfor %}
+            {% endwith %}
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+
+{% else %}
+    {% block auth_content %}{% endblock %}
+{% endif %}
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('a[href]').forEach(link => {
+            if (link.href && link.href.startsWith(window.location.origin)
+                && !link.href.includes('#') && !link.target) {
+                link.addEventListener('click', e => {
+                    const wrapper = document.querySelector('.page-wrapper');
+                    if (wrapper) {
+                        e.preventDefault();
+                        wrapper.style.opacity = '0';
+                        wrapper.style.transform = 'translateY(8px)';
+                        wrapper.style.transition = 'opacity 0.2s ease, transform 0.2s ease';
+                        setTimeout(() => { window.location.href = link.href; }, 200);
+                    }
+                });
+            }
+        });
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,240 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Tableau de bord' if lang=='fr' else 'Dashboard' }}{% endblock %}
+
+{% block content %}
+
+{% if lang == 'en' %}
+  {% set tx = {
+    'hello': 'Hello',
+    'my_projects': 'My Projects',
+    'applications_received': 'Applications Received',
+    'open_projects': 'Open Projects',
+    'accepted_students': 'Accepted Students',
+    'recent_projects': 'My Recent Projects',
+    'new_project': '+ New Project',
+    'no_project': 'You have not created any project yet.',
+    'create_first': 'Create my first project',
+    'application_count': 'application(s)',
+    'open_label': 'Open',
+    'closed_label': 'Closed',
+    'in_progress_label': 'In Progress',
+    'completed_label': 'Completed',
+    'general': 'General',
+    'my_applications': 'My Applications',
+    'accepted': 'Accepted',
+    'pending': 'Pending',
+    'recent_open': 'Recent Open Projects',
+  } %}
+{% else %}
+  {% set tx = {
+    'hello': 'Bonjour',
+    'my_projects': 'Mes projets',
+    'applications_received': 'Candidatures reçues',
+    'open_projects': 'Projets ouverts',
+    'accepted_students': 'Étudiants acceptés',
+    'recent_projects': 'Mes projets récents',
+    'new_project': '+ Nouveau projet',
+    'no_project': 'Vous n\'avez pas encore créé de projet.',
+    'create_first': 'Créer mon premier projet',
+    'application_count': 'candidature(s)',
+    'open_label': 'Ouvert',
+    'closed_label': 'Fermé',
+    'in_progress_label': 'En cours',
+    'completed_label': 'Terminé',
+    'general': 'Général',
+    'my_applications': 'Mes candidatures',
+    'accepted': 'Acceptées',
+    'pending': 'En attente',
+    'recent_open': 'Projets récents ouverts',
+  } %}
+{% endif %}
+
+<!-- En-tête -->
+<div class="page-header">
+    <h1>{{ tx.hello }}, {{ current_user.name.split()[0] }} 👋</h1>
+    <p>{{ now.strftime('%A %d %B %Y') if now else '' }}</p>
+</div>
+
+{% if current_user.is_teacher() %}
+<!-- ── Dashboard Enseignant ── -->
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="stat-icon gold">📋</div>
+            <div>
+                <div class="stat-value">{{ projects|length }}</div>
+                <div class="stat-label">{{ tx.my_projects }}</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="stat-icon black">📄</div>
+            <div>
+                <div class="stat-value">{{ total_apps }}</div>
+                <div class="stat-label">{{ tx.applications_received }}</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="stat-icon green">✅</div>
+            <div>
+                <div class="stat-value">
+                    {{ projects|selectattr('status','eq','open')|list|length }}
+                </div>
+                <div class="stat-label">{{ tx.open_projects }}</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="stat-icon blue">🎓</div>
+            <div>
+                <div class="stat-value">
+                    {{ projects|map(attribute='applications')
+                       |map('selectattr','status','eq','accepted')
+                       |map('list')|map('length')|sum }}
+                </div>
+                <div class="stat-label">{{ tx.accepted_students }}</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Stats par statut -->
+<div style="display:flex; gap:10px; margin-bottom:24px; flex-wrap:wrap;">
+    {% for status_key, label, color in [
+        ('open',        tx.open_label,        '#16a34a'),
+        ('in_progress', tx.in_progress_label, '#2563eb'),
+        ('completed',   tx.completed_label,   '#888888'),
+        ('closed',      tx.closed_label,      '#dc2626'),
+    ] %}
+    <div style="flex:1; min-width:100px; background:#fff; border-radius:10px;
+                padding:14px 16px; border:1px solid #E8E8E8;">
+        <div style="font-size:1.4rem; font-weight:700; color:{{ color }};">
+            {{ stats[status_key] }}
+        </div>
+        <div style="font-size:0.75rem; color:#888; margin-top:2px;">{{ label }}</div>
+    </div>
+    {% endfor %}
+</div>
+
+<div style="display:flex; justify-content:space-between;
+            align-items:center; margin-bottom:20px;">
+    <h2 style="font-size:1.2rem; font-weight:700;">{{ tx.recent_projects }}</h2>
+    <a href="{{ url_for('main.create_project') }}" class="btn-gold">
+        {{ tx.new_project }}
+    </a>
+</div>
+
+<div class="row g-3">
+    {% for project in projects %}
+    <div class="col-md-4">
+        <a href="{{ url_for('main.project_detail', id=project.id) }}"
+           class="project-card">
+            <div>
+                <span class="domain-badge">
+                    {{ project.get_domain(lang) }}
+                </span>
+                <span class="status-badge status-{{ project.status }}">
+                    {{ project.status_label(lang) }}
+                </span>
+            </div>
+            <h5>{{ project.get_title(lang)[:65] }}
+                {% if project.get_title(lang)|length > 65 %}...{% endif %}
+            </h5>
+            <p>{{ project.get_description(lang)[:100] }}...</p>
+            <div class="project-meta">
+                <span>👥 {{ project.applications|length }} {{ tx.application_count }}</span>
+                <span>📅 {{ project.created_at.strftime('%d %b') }}</span>
+            </div>
+        </a>
+    </div>
+    {% else %}
+    <div class="col-12">
+        <div style="text-align:center; padding:60px; background:#fff;
+                    border-radius:14px; border:1px dashed #DDD;">
+            <div style="font-size:2.5rem; margin-bottom:12px;">📋</div>
+            <p style="color:#999; margin-bottom:16px;">{{ tx.no_project }}</p>
+            <a href="{{ url_for('main.create_project') }}" class="btn-gold">
+                {{ tx.create_first }}
+            </a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+{% else %}
+<!-- ── Dashboard Étudiant ── -->
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="stat-icon gold">📋</div>
+            <div>
+                <div class="stat-value">{{ open_projects_count }}</div>
+                <div class="stat-label">{{ tx.open_projects }}</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="stat-icon black">📄</div>
+            <div>
+                <div class="stat-value">{{ applications|length }}</div>
+                <div class="stat-label">{{ tx.my_applications }}</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="stat-icon green">✅</div>
+            <div>
+                <div class="stat-value">
+                    {{ applications|selectattr('status','eq','accepted')|list|length }}
+                </div>
+                <div class="stat-label">{{ tx.accepted }}</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="stat-icon blue">⏳</div>
+            <div>
+                <div class="stat-value">
+                    {{ applications|selectattr('status','eq','pending')|list|length }}
+                </div>
+                <div class="stat-label">{{ tx.pending }}</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<h2 style="font-size:1.2rem; font-weight:700; margin-bottom:20px;">
+    {{ tx.recent_open }}
+</h2>
+
+<div class="row g-3">
+    {% for project in recent_projects %}
+    <div class="col-md-4">
+        <a href="{{ url_for('main.project_detail', id=project.id) }}"
+           class="project-card">
+            <div>
+                <span class="domain-badge">{{ project.get_domain(lang) }}</span>
+                <span class="status-badge status-open">{{ tx.open_label }}</span>
+            </div>
+            <h5>{{ project.get_title(lang)[:65] }}
+                {% if project.get_title(lang)|length > 65 %}...{% endif %}
+            </h5>
+            <p>{{ project.get_description(lang)[:100] }}...</p>
+            <div class="project-meta">
+                <span>Dr. {{ project.teacher.name.split()[-1] }}</span>
+                <span>📅 {{ project.created_at.strftime('%d %b') }}</span>
+            </div>
+        </a>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+{% endblock %}

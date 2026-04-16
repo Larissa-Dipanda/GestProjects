@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block title %}{{ project.title }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <h1>{{ project.title }}</h1>
+        <span class="badge bg-success mb-3">{{ project.status }}</span>
+        <span class="badge bg-secondary mb-3">{{ project.domain or 'Non défini' }}</span>
+
+        <p class="mt-3">{{ project.description }}</p>
+
+        <ul class="list-group list-group-flush mb-4">
+            <li class="list-group-item">
+                <strong>Enseignant :</strong> {{ project.teacher.name }}
+            </li>
+            <li class="list-group-item">
+                <strong>Places disponibles :</strong> {{ project.max_students }}
+            </li>
+            <li class="list-group-item">
+                <strong>Candidatures reçues :</strong> {{ project.applications|length }}
+            </li>
+            <li class="list-group-item">
+                <strong>Publié le :</strong> {{ project.created_at.strftime('%d/%m/%Y') }}
+            </li>
+        </ul>
+
+        <!-- Formulaire de candidature (étudiants seulement) -->
+        {% if current_user.is_authenticated and current_user.is_student() %}
+            {% if user_application %}
+                <div class="alert alert-info">
+                    Vous avez déjà postulé à ce projet. 
+                    Statut : <strong>{{ user_application.status }}</strong>
+                </div>
+            {% elif project.status == 'open' %}
+                <h4 class="mt-4">Postuler à ce projet</h4>
+                <form method="POST" action="{{ url_for('main.apply_project', id=project.id) }}">
+                    {{ form.hidden_tag() }}
+                    <div class="mb-3">
+                        {{ form.motivation.label(class="form-label") }}
+                        {{ form.motivation(class="form-control", rows=5) }}
+                        {% for error in form.motivation.errors %}
+                            <div class="text-danger small">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <button type="submit" class="btn btn-success">Envoyer ma candidature</button>
+                </form>
+            {% endif %}
+        {% elif not current_user.is_authenticated %}
+            <div class="alert alert-warning">
+                <a href="{{ url_for('auth.login') }}">Connectez-vous</a> pour postuler.
+            </div>
+        {% endif %}
+
+        <!-- Liste des candidatures (enseignant propriétaire seulement) -->
+        {% if current_user.is_authenticated and current_user.is_teacher() and current_user.id == project.teacher_id %}
+            <h4 class="mt-5">Candidatures reçues</h4>
+            {% for app in project.applications %}
+            <div class="card mb-2">
+                <div class="card-body">
+                    <h6>{{ app.student.name }} — <span class="badge bg-warning">{{ app.status }}</span></h6>
+                    <p>{{ app.motivation }}</p>
+                    {% if app.status == 'pending' %}
+                    <form method="POST" action="{{ url_for('main.manage_application', id=app.id, action='accept') }}" class="d-inline">
+                        {{ form.hidden_tag() }}
+                        <button class="btn btn-success btn-sm">Accepter</button>
+                    </form>
+                    <form method="POST" action="{{ url_for('main.manage_application', id=app.id, action='reject') }}" class="d-inline">
+                        {{ form.hidden_tag() }}
+                        <button class="btn btn-danger btn-sm">Refuser</button>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+            {% else %}
+            <p class="text-muted">Aucune candidature pour ce projet.</p>
+            {% endfor %}
+        {% endif %}
+    </div>
+
+    <div class="col-md-4">
+        <a href="{{ url_for('main.projects_list') }}" class="btn btn-outline-secondary w-100 mb-2">
+            Retour à la liste
+        </a>
+        {% if current_user.is_authenticated and current_user.is_teacher() and current_user.id == project.teacher_id %}
+        <a href="{{ url_for('main.edit_project', id=project.id) }}" class="btn btn-warning w-100 mb-2">
+            Modifier ce projet
+        </a>
+        <form method="POST" action="{{ url_for('main.delete_project', id=project.id) }}">
+            {{ form.hidden_tag() }}
+            <button class="btn btn-danger w-100" onclick="return confirm('Supprimer ce projet ?')">
+                Supprimer
+            </button>
+        </form>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

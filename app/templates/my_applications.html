@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Mes candidatures' if lang=='fr' else 'My Applications' }}{% endblock %}
+
+{% block content %}
+
+{% if lang == 'en' %}
+  {% set tx = {
+    'title': 'My Applications',
+    'total': 'application(s) in total',
+    'all': 'All',
+    'pending': 'Pending',
+    'accepted': 'Accepted',
+    'rejected': 'Rejected',
+    'applied_on': 'Applied on',
+    'status_accepted': '✅ Accepted',
+    'status_rejected': '❌ Rejected',
+    'status_pending': '⏳ Pending',
+    'none_title': 'No application',
+    'none_text': 'You have not applied to any project yet.',
+    'explore': 'Explore Projects',
+  } %}
+{% else %}
+  {% set tx = {
+    'title': 'Mes candidatures',
+    'total': 'candidature(s) au total',
+    'all': 'Toutes',
+    'pending': 'En attente',
+    'accepted': 'Acceptées',
+    'rejected': 'Refusées',
+    'applied_on': 'Postulé le',
+    'status_accepted': '✅ Acceptée',
+    'status_rejected': '❌ Refusée',
+    'status_pending': '⏳ En attente',
+    'none_title': 'Aucune candidature',
+    'none_text': 'Vous n\'avez pas encore postulé.',
+    'explore': 'Explorer les projets',
+  } %}
+{% endif %}
+
+<div class="page-header">
+    <h1>{{ tx.title }}</h1>
+    <p>{{ applications|length }} {{ tx.total }}</p>
+</div>
+
+<!-- Onglets filtres -->
+<div style="display:flex; gap:8px; margin-bottom:24px; flex-wrap:wrap;">
+    <button onclick="filterApps('all')"
+            style="padding:8px 18px; border-radius:20px;
+                   border:1.5px solid #C9A84C; background:#C9A84C;
+                   color:#fff; font-weight:600; font-size:0.82rem; cursor:pointer;">
+        {{ tx.all }} {{ applications|length }}
+    </button>
+    <button onclick="filterApps('pending')"
+            style="padding:8px 18px; border-radius:20px;
+                   border:1.5px solid #E0E0E0; background:#fff;
+                   color:#555; font-weight:600; font-size:0.82rem; cursor:pointer;">
+        {{ tx.pending }}
+        {{ applications|selectattr('status','eq','pending')|list|length }}
+    </button>
+    <button onclick="filterApps('accepted')"
+            style="padding:8px 18px; border-radius:20px;
+                   border:1.5px solid #E0E0E0; background:#fff;
+                   color:#555; font-weight:600; font-size:0.82rem; cursor:pointer;">
+        {{ tx.accepted }}
+        {{ applications|selectattr('status','eq','accepted')|list|length }}
+    </button>
+    <button onclick="filterApps('rejected')"
+            style="padding:8px 18px; border-radius:20px;
+                   border:1.5px solid #E0E0E0; background:#fff;
+                   color:#555; font-weight:600; font-size:0.82rem; cursor:pointer;">
+        {{ tx.rejected }}
+        {{ applications|selectattr('status','eq','rejected')|list|length }}
+    </button>
+</div>
+
+{% if applications %}
+<div id="apps-list">
+    {% for app in applications %}
+    <div class="app-item" data-status="{{ app.status }}"
+         style="background:#fff; border:1px solid #E8E8E8; border-radius:12px;
+                padding:20px 24px; margin-bottom:12px; display:flex;
+                justify-content:space-between; align-items:center;
+                transition:box-shadow 0.2s;"
+         onmouseover="this.style.boxShadow='0 4px 16px rgba(0,0,0,0.08)'"
+         onmouseout="this.style.boxShadow='none'">
+        <div>
+            <a href="{{ url_for('main.project_detail', id=app.project.id) }}"
+               style="font-weight:600; font-size:0.95rem; color:#0A0A0A;
+                      text-decoration:none;">
+                {{ app.project.get_title(lang) }}
+            </a>
+            <div style="font-size:0.8rem; color:#999; margin-top:4px;">
+                Dr. {{ app.project.teacher.name }} •
+                {{ tx.applied_on }} {{ app.applied_at.strftime('%d/%m/%Y') }}
+            </div>
+            <div style="margin-top:6px;">
+                <span style="font-size:0.72rem; background:#F3F3F3;
+                             color:#555; padding:2px 8px; border-radius:6px;">
+                    {{ app.project.get_domain(lang) }}
+                </span>
+            </div>
+        </div>
+        <div>
+            {% if app.status == 'accepted' %}
+                <span style="background:rgba(34,197,94,0.12); color:#16a34a;
+                             padding:6px 16px; border-radius:20px;
+                             font-size:0.78rem; font-weight:600; white-space:nowrap;">
+                    {{ tx.status_accepted }}
+                </span>
+            {% elif app.status == 'rejected' %}
+                <span style="background:rgba(239,68,68,0.12); color:#dc2626;
+                             padding:6px 16px; border-radius:20px;
+                             font-size:0.78rem; font-weight:600; white-space:nowrap;">
+                    {{ tx.status_rejected }}
+                </span>
+            {% else %}
+                <span style="background:rgba(201,168,76,0.15); color:#A07830;
+                             padding:6px 16px; border-radius:20px;
+                             font-size:0.78rem; font-weight:600; white-space:nowrap;">
+                    {{ tx.status_pending }}
+                </span>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+{% else %}
+<div style="text-align:center; padding:80px; background:#fff;
+            border-radius:14px; border:1px dashed #DDD;">
+    <div style="font-size:3rem; margin-bottom:16px;">📄</div>
+    <h3 style="font-weight:600; margin-bottom:8px;">{{ tx.none_title }}</h3>
+    <p style="color:#999; margin-bottom:20px;">{{ tx.none_text }}</p>
+    <a href="{{ url_for('main.projects_list') }}" class="btn-gold">
+        {{ tx.explore }}
+    </a>
+</div>
+{% endif %}
+
+<script>
+function filterApps(status) {
+    document.querySelectorAll('.app-item').forEach(el => {
+        el.style.display = (status === 'all' || el.dataset.status === status)
+                           ? 'flex' : 'none';
+    });
+    document.querySelectorAll('[onclick^="filterApps"]').forEach(btn => {
+        btn.style.background = '#fff';
+        btn.style.color = '#555';
+        btn.style.borderColor = '#E0E0E0';
+    });
+    event.target.style.background = '#C9A84C';
+    event.target.style.color = '#fff';
+    event.target.style.borderColor = '#C9A84C';
+}
+</script>
+
+{% endblock %}

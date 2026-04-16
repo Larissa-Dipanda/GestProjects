@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+
+{% block auth_content %}
+<div class="auth-wrapper">
+    <!-- Gauche sombre -->
+        <div class="auth-left" style="position:relative; overflow:hidden;">
+
+    <!-- Image de fond arbre + livres -->
+    <div style="position:absolute; inset:0; z-index:0;">
+        <img src="https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?w=900&auto=format&fit=crop&q=80"
+             alt="Arbre et livres"
+             style="width:100%; height:100%; object-fit:cover; object-position:center;">
+        <!-- Overlay sombre pour lisibilité -->
+        <div style="position:absolute; inset:0;
+                    background:linear-gradient(160deg,
+                        rgba(10,10,10,0.92) 0%,
+                        rgba(10,10,10,0.80) 50%,
+                        rgba(20,12,0,0.88) 100%);">
+        </div>
+    </div>
+
+    <!-- Contenu par-dessus l'image -->
+    <div style="position:relative; z-index:1;">
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:40px;">
+            <div style="width:36px; height:36px; background:rgba(201,168,76,0.2);
+                        border-radius:8px; display:flex; align-items:center;
+                        justify-content:center; border:1px solid rgba(201,168,76,0.3);">
+                <svg width="20" height="20" fill="none" stroke="#C9A84C"
+                     stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                          d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5
+                             S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18
+                             7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477
+                             14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13
+                             C19.832 18.477 18.247 18 16.5 18c-1.746 0
+                             -3.332.477-4.5 1.253"/>
+                </svg>
+            </div>
+            <div style="color:#C9A84C; font-size:1.3rem; font-weight:700;">
+                GestProjects
+            </div>
+        </div>
+
+        <h1 style="color:#fff; font-size:2.8rem; font-weight:700;
+                   line-height:1.2; margin-bottom:16px;">
+            Connectez<br>étudiants &amp;<br>enseignants
+        </h1>
+        <p style="color:rgba(255,255,255,0.5); margin-bottom:48px; font-size:0.95rem;">
+            Autour de projets académiques d'excellence.
+        </p>
+
+        <div style="display:flex; flex-direction:column; gap:12px;">
+            <div style="background:rgba(255,255,255,0.06);
+                        border:1px solid rgba(201,168,76,0.2);
+                        border-radius:10px; padding:16px 20px;
+                        backdrop-filter:blur(8px);">
+                <div style="color:#C9A84C; font-weight:700; font-size:1.1rem;">250+</div>
+                <div style="color:rgba(255,255,255,0.45); font-size:0.78rem; margin-top:2px;">
+                    Projets publiés
+                </div>
+            </div>
+            <div style="background:rgba(255,255,255,0.06);
+                        border:1px solid rgba(201,168,76,0.2);
+                        border-radius:10px; padding:16px 20px;
+                        backdrop-filter:blur(8px);">
+                <div style="color:#C9A84C; font-weight:700; font-size:1.1rem;">600+</div>
+                <div style="color:rgba(255,255,255,0.45); font-size:0.78rem; margin-top:2px;">
+                    Étudiants inscrits
+                </div>
+            </div>
+            <div style="background:rgba(255,255,255,0.06);
+                        border:1px solid rgba(201,168,76,0.2);
+                        border-radius:10px; padding:16px 20px;
+                        backdrop-filter:blur(8px);">
+                <div style="color:#C9A84C; font-weight:700; font-size:1.1rem;">90%</div>
+                <div style="color:rgba(255,255,255,0.45); font-size:0.78rem; margin-top:2px;">
+                    Taux de succès
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <!-- Droite claire -->
+    <div class="auth-right">
+        <div class="auth-form-box">
+            <h2 style="font-size:1.8rem; font-weight:700; margin-bottom:8px;">Bon retour !</h2>
+            <p style="color:#888; margin-bottom:32px;">Connectez-vous pour avoir accès à votre espace.</p>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endwith %}
+
+            <form method="POST">
+                {{ form.hidden_tag() }}
+                <div class="mb-4">
+                    <label class="form-label" style="font-weight:600; font-size:0.875rem;">
+                        Adresse e-mail
+                    </label>
+                    {{ form.email(class="form-control", placeholder="youmbi@univ-douala.cm") }}
+                    {% for e in form.email.errors %}
+                        <div class="text-danger small mt-1">{{ e }}</div>
+                    {% endfor %}
+                </div>
+                <div class="mb-4">
+                    <label class="form-label" style="font-weight:600; font-size:0.875rem;">
+                        Mot de passe
+                    </label>
+                    {{ form.password(class="form-control", placeholder="••••••••") }}
+                </div>
+                <button type="submit" class="btn-gold w-100" style="justify-content:center; padding:12px;">
+                    → Se connecter
+                </button>
+            </form>
+
+            <p style="text-align:center; margin-top:24px; font-size:0.875rem; color:#888;">
+                Pas encore de compte ?
+                <a href="{{ url_for('auth.register') }}"
+                   style="color:#C9A84C; font-weight:600; text-decoration:none;">
+                    Créer un compte
+                </a>
+            </p>
+
+            <!-- Comptes de démo -->
+            <div style="margin-top:28px; background:#F9F9F9; border-radius:10px; padding:16px;">
+                <div style="font-size:0.75rem; font-weight:600; color:#999;
+                            text-transform:uppercase; letter-spacing:0.5px; margin-bottom:10px;">
+                    Comptes de démonstration
+                </div>
+                <div style="display:flex; justify-content:space-between;
+                            font-size:0.82rem; padding:6px 0; border-bottom:1px solid #EEE;">
+                    <span style="font-weight:500;">Enseignant</span>
+                    <span style="color:#999;">teacher@univ.fr</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; font-size:0.82rem; padding:6px 0;">
+                    <span style="font-weight:500;">Étudiant</span>
+                    <span style="color:#999;">student@univ.fr</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
