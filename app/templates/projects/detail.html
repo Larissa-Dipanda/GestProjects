@@ -5,11 +5,11 @@
 {% block content %}
 <div class="row">
     <div class="col-md-8">
-        <h1>{{ project.title }}</h1>
+        <h1>{{ project.get_title(lang) }}</h1>
         <span class="badge bg-success mb-3">{{ project.status }}</span>
-        <span class="badge bg-secondary mb-3">{{ project.domain or 'Non défini' }}</span>
+        <span class="badge bg-secondary mb-3">{{ project.get_domain(lang) }}</span>
 
-        <p class="mt-3">{{ project.description }}</p>
+        <p class="mt-3">{{ project.get_description(lang) }}</p>
 
         <ul class="list-group list-group-flush mb-4">
             <li class="list-group-item">

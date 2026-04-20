@@ -4,40 +4,7 @@ from flask_login import login_required, current_user
 from datetime import datetime
 from app.models import Project, Application, User
 from app.extensions import db
-
-# Cache de traduction
-_translation_cache = {}
-
-def auto_translate(text: str) -> str:
-    """Traduit automatiquement un texte français vers l'anglais."""
-    if not text or not text.strip():
-        return text
-
-    cache_key = hash(text.strip())
-    if cache_key in _translation_cache:
-        return _translation_cache[cache_key]
-
-    try:
-        import anthropic
-        client = anthropic.Anthropic()
-        message = client.messages.create(
-            model="claude-sonnet-4-6",
-            max_tokens=500,
-            messages=[{
-                "role": "user",
-                "content": (
-                    "Translate the following text from French to English. "
-                    "Return ONLY the translated text, no explanation:\n\n"
-                    + text
-                )
-            }]
-        )
-        result = message.content[0].text.strip()
-        _translation_cache[cache_key] = result
-        return result
-    except Exception:
-        return text  # Si erreur, retourne le texte original
-
+from app.utils import auto_translate
 main = Blueprint('main', __name__)
 
 
@@ -127,9 +94,15 @@ def projects_list():
     query = Project.query
 
     if search:
-        query = query.filter(Project.title.ilike(f'%{search}%'))
+        if lang == 'en':
+            query = query.filter(Project.title_en.ilike(f'%{search}%'))
+        else:
+            query = query.filter(Project.title.ilike(f'%{search}%'))
     if domain:
-        query = query.filter(Project.domain.ilike(f'%{domain}%'))
+        if lang == 'en':
+            query = query.filter(Project.domain_en.ilike(f'%{domain}%'))
+        else:
+            query = query.filter(Project.domain.ilike(f'%{domain}%'))
     if status_filter:
         query = query.filter(Project.status == status_filter)
 
@@ -145,16 +118,21 @@ def projects_list():
         'completed': Project.query.filter_by(status='completed').count(),
     }
 
-    domains = db.session.query(Project.domain).distinct().order_by(
-        Project.domain).all()
-    domains = [d[0] for d in domains if d[0]]
+    # ── Domaines traduits selon la langue ──
+    if lang == 'en':
+        raw_domains = db.session.query(Project.domain_en).distinct().order_by(
+            Project.domain_en).all()
+        domains = [d[0] for d in raw_domains if d[0]]
+    else:
+        raw_domains = db.session.query(Project.domain).distinct().order_by(
+            Project.domain).all()
+        domains = [d[0] for d in raw_domains if d[0]]
 
     return render_template('projects/list.html', projects=projects,
                            search=search, domain=domain,
                            status_filter=status_filter,
                            global_stats=global_stats,
                            domains=domains, lang=lang)
-
 
 # ── Détail projet ─────────────────────────────────────────────
 @main.route('/projects/<int:id>')
@@ -172,27 +150,61 @@ def project_detail(id):
                            lang=lang)
 
 
-# ── Créer projet ──────────────────────────────────────────────
-@main.route('/projects/new', methods=['GET', 'POST'])
+# ─@main.route('/projects/new', methods=['GET', 'POST'])
 @login_required
 @teacher_required
 def create_project():
     from app.forms import ProjectForm
+    import concurrent.futures
     form = ProjectForm()
     lang = get_lang()
-    if form.validate_on_submit():
 
-        # Traduction automatique vers l'anglais
-        title_en = auto_translate(form.title.data)
-        description_en = auto_translate(form.description.data)
-        domain_en = auto_translate(form.domain.data) if form.domain.data else ''
+    DOMAIN_EN_TO_FR = {
+        'Computer Science': 'Informatique',
+        'Artificial Intelligence': 'Intelligence Artificielle',
+        'Software Engineering': 'Génie logiciel',
+        'Networks & Security': 'Réseaux et Sécurité',
+        'Mobile': 'Mobile',
+        'Health': 'Santé',
+        'Smart Agriculture': 'Agriculture intelligente',
+        'Environment': 'Environnement',
+        'Education': 'Éducation',
+        'Finance': 'Finance',
+        'Mathematics': 'Mathématiques',
+        'Physics': 'Physique',
+        'Chemistry': 'Chimie',
+        'Architecture': 'Architecture',
+        'Law': 'Droit',
+    }
+    DOMAIN_FR_TO_EN = {v: k for k, v in DOMAIN_EN_TO_FR.items()}
+
+    if form.validate_on_submit():
+        domain_input = form.domain.data or ''
+
+        if lang == 'en' and domain_input in DOMAIN_EN_TO_FR:
+            domain_fr = DOMAIN_EN_TO_FR[domain_input]
+            domain_en = domain_input
+        else:
+            domain_fr = domain_input
+            domain_en = DOMAIN_FR_TO_EN.get(domain_input, '')
+
+        # Traductions en parallèle
+        with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
+            future_title = executor.submit(auto_translate, form.title.data)
+            future_desc = executor.submit(auto_translate, form.description.data)
+            if not domain_en:
+                future_domain = executor.submit(auto_translate, domain_input)
+            title_en = future_title.result()
+            desc_en = future_desc.result()
+            if not domain_en:
+                domain_en = future_domain.result()
 
         project = Project(
             title=form.title.data,
             title_en=title_en,
             description=form.description.data,
-            description_en=description_en,
-            domain=form.domain.data,
+            description_en=desc_en,
+            domain=domain_fr,
             domain_en=domain_en,
             max_students=form.max_students.data,
             status=form.status.data,
@@ -200,8 +212,10 @@ def create_project():
         )
         db.session.add(project)
         db.session.commit()
-        flash('Projet créé avec succès !' if lang == 'fr' else 'Project created!', 'success')
+        flash('Projet créé avec succès !' if lang == 'fr' else 'Project created!',
+              'success')
         return redirect(url_for('main.dashboard'))
+
     return render_template('projects/create.html', form=form, lang=lang)
 
 # ── Modifier projet ───────────────────────────────────────────
@@ -210,6 +224,7 @@ def create_project():
 @teacher_required
 def edit_project(id):
     from app.forms import ProjectForm
+    import concurrent.futures
     project = Project.query.get_or_404(id)
     if project.teacher_id != current_user.id:
         abort(403)
@@ -217,15 +232,24 @@ def edit_project(id):
     lang = get_lang()
     if form.validate_on_submit():
         project.title = form.title.data
-        project.title_en = auto_translate(form.title.data)
         project.description = form.description.data
-        project.description_en = auto_translate(form.description.data)
         project.domain = form.domain.data
-        project.domain_en = auto_translate(form.domain.data) if form.domain.data else ''
         project.max_students = form.max_students.data
         project.status = form.status.data
+
+        # Traductions en parallèle pour réduire le temps d'attente
+        with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
+            future_title = executor.submit(auto_translate, form.title.data)
+            future_desc = executor.submit(auto_translate, form.description.data)
+            future_domain = executor.submit(
+                auto_translate, form.domain.data or '')
+            project.title_en = future_title.result()
+            project.description_en = future_desc.result()
+            project.domain_en = future_domain.result()
+
         db.session.commit()
-        flash('Projet modifié !' if lang == 'fr' else 'Project updated!', 'success')
+        flash('Projet modifié !' if lang == 'fr' else 'Project updated!',
+              'success')
         return redirect(url_for('main.dashboard'))
     return render_template('projects/edit.html', form=form,
                            project=project, lang=lang)

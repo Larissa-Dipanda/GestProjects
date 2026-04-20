@@ -42,14 +42,13 @@ class Project(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(200), nullable=False)
-    description = db.Column(db.Text, nullable=False)
-    domain = db.Column(db.String(100))
     title_en = db.Column(db.String(200))
+    description = db.Column(db.Text, nullable=False)
     description_en = db.Column(db.Text)
+    domain = db.Column(db.String(100))
     domain_en = db.Column(db.String(100))
     teacher_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     max_students = db.Column(db.Integer, default=1)
-    # Statuts : 'open', 'closed', 'in_progress', 'completed'
     status = db.Column(db.String(20), default='open')
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow,
@@ -59,19 +58,28 @@ class Project(db.Model):
                                    lazy=True, cascade='all, delete-orphan')
 
     def get_title(self, lang='fr'):
-        if lang == 'en' and self.title_en:
-            return self.title_en
+        if lang == 'en':
+            if self.title_en:
+                return self.title_en
+            from app.utils import auto_translate
+            return auto_translate(self.title)
         return self.title
 
     def get_description(self, lang='fr'):
-        if lang == 'en' and self.description_en:
-            return self.description_en
+        if lang == 'en':
+            if self.description_en:
+                return self.description_en
+            from app.utils import auto_translate
+            return auto_translate(self.description)
         return self.description
 
     def get_domain(self, lang='fr'):
-        if lang == 'en' and self.domain_en:
-            return self.domain_en
-        return self.domain
+        if lang == 'en':
+            if self.domain_en:
+                return self.domain_en
+            from app.utils import auto_translate
+            return auto_translate(self.domain or '')
+        return self.domain or 'Général'
 
     def status_label(self, lang='fr'):
         labels = {

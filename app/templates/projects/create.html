@@ -44,7 +44,7 @@
                     <span style="color:#dc2626;">*</span>
                 </label>
                 {{ form.title(class="form-control",
-                   placeholder="Ex: Système de détection de maladies par IA — édition 2026") }}
+                   placeholder="{{ 'Ex: Système de détection de maladies par IA — édition 2026' if lang=='fr' else 'Ex: Disease detection system by AI — edition 2026' }}") }}
                 {% for e in form.title.errors %}
                 <div style="color:#dc2626; font-size:0.78rem; margin-top:4px;">{{ e }}</div>
                 {% endfor %}
@@ -58,14 +58,27 @@
                         {{ '🏷️ Domaine' if lang=='fr' else '🏷️ Domain' }}
                     </label>
                     <select name="domain" class="form-select">
-                        <option value="">{{ 'Sélectionner...' if lang=='fr' else 'Select...' }}</option>
-                        {% for d in ['Informatique','Intelligence Artificielle','Génie logiciel',
-                                     'Réseaux et Sécurité','Mobile','Santé','Agriculture intelligente',
-                                     'Environnement','Éducation','Finance','Mathématiques',
-                                     'Physique','Chimie','Architecture','Droit'] %}
-                        <option value="{{ d }}">{{ d }}</option>
-                        {% endfor %}
-                    </select>
+    <option value="">{{ 'Sélectionner...' if lang=='fr' else 'Select...' }}</option>
+    {% if lang == 'en' %}
+        {% for d in ['Computer Science', 'Artificial Intelligence',
+                     'Software Engineering', 'Networks & Security',
+                     'Mobile', 'Health', 'Smart Agriculture',
+                     'Environment', 'Education', 'Finance',
+                     'Mathematics', 'Physics', 'Chemistry',
+                     'Architecture', 'Law'] %}
+        <option value="{{ d }}">{{ d }}</option>
+        {% endfor %}
+    {% else %}
+        {% for d in ['Informatique', 'Intelligence Artificielle',
+                     'Génie logiciel', 'Réseaux et Sécurité',
+                     'Mobile', 'Santé', 'Agriculture intelligente',
+                     'Environnement', 'Éducation', 'Finance',
+                     'Mathématiques', 'Physique', 'Chimie',
+                     'Architecture', 'Droit'] %}
+        <option value="{{ d }}">{{ d }}</option>
+        {% endfor %}
+    {% endif %}
+</select>
                 </div>
                 <div>
                     <label style="display:block; font-weight:600; font-size:0.875rem;
@@ -97,19 +110,19 @@
                     {{ '🔖 Statut initial' if lang=='fr' else '🔖 Initial status' }}
                 </label>
                 <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:10px;">
-                    {% for val, label, color, bg, desc in [
-                        ('open',        'Ouvert' if lang=='fr' else 'Open',
-                         '#16a34a','rgba(34,197,94,0.1)',
-                         'Visible et ouvert aux candidatures'),
-                        ('in_progress', 'En cours' if lang=='fr' else 'In Progress',
-                         '#2563eb','rgba(37,99,235,0.1)',
-                         'Projet déjà en cours de réalisation'),
-                        ('completed',   'Terminé' if lang=='fr' else 'Completed',
-                         '#888','rgba(136,136,136,0.1)',
-                         'Projet archivé et terminé'),
-                        ('closed',      'Fermé' if lang=='fr' else 'Closed',
-                         '#dc2626','rgba(239,68,68,0.1)',
-                         'Fermé, plus de candidatures'),
+                    {% for val, label, desc in [
+                        ('open',
+                        'Ouvert' if lang=='fr' else 'Open',
+                        'Visible et ouvert aux candidatures' if lang=='fr' else 'Open for applications'),
+                        ('in_progress',
+                        'En cours' if lang=='fr' else 'In Progress',
+                        'Projet en cours de réalisation' if lang=='fr' else 'Project in progress'),
+                        ('completed',
+                        'Terminé' if lang=='fr' else 'Completed',
+                        'Projet archivé et terminé' if lang=='fr' else 'Archived and completed'),
+                        ('closed',
+                        'Fermé' if lang=='fr' else 'Closed',
+                        'Fermé, plus de candidatures' if lang=='fr' else 'Closed, no more applications'),
                     ] %}
                     <label style="cursor:pointer;">
                         <input type="radio" name="status" value="{{ val }}"
