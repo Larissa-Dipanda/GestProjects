@@ -100,11 +100,133 @@
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #DDD; border-radius: 3px; }
+
+        /* ── Responsive Mobile ── */
+@media (max-width: 768px) {
+
+    /* Cache la sidebar par défaut sur mobile */
+    .sidebar {
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+        z-index: 1000;
+        width: 260px !important;
+    }
+
+    .sidebar.open {
+        transform: translateX(0);
+    }
+
+    /* Le contenu prend toute la largeur */
+    .main-content {
+        margin-left: 0 !important;
+        padding: 16px !important;
+        width: 100% !important;
+    }
+
+    /* Overlay sombre quand sidebar ouverte */
+    .sidebar-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.5);
+        z-index: 999;
+    }
+
+    .sidebar-overlay.open {
+        display: block;
+    }
+
+    /* Bouton hamburger */
+    .hamburger {
+        display: flex !important;
+    }
+
+    /* Grilles en colonne sur mobile */
+    .row {
+        flex-direction: column;
+    }
+
+    .col-md-3, .col-md-4, .col-md-6, .col-md-8 {
+        width: 100% !important;
+        max-width: 100% !important;
+        flex: 0 0 100% !important;
+    }
+
+    /* Stats cards en 2 colonnes */
+    .row.g-3 {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 10px !important;
+    }
+
+    .stat-card {
+        padding: 14px !important;
+    }
+
+    .stat-value {
+        font-size: 1.4rem !important;
+    }
+
+    /* Page header */
+    .page-header h1 {
+        font-size: 1.4rem !important;
+    }
+
+    /* Project cards pleine largeur */
+    .project-card {
+        margin-bottom: 12px;
+    }
+
+    /* Tableau de bord */
+    .page-header {
+        margin-bottom: 20px;
+    }
+
+    /* Texte utilisateur tronqué */
+    .user-name {
+        font-size: 0.78rem !important;
+    }
+}
+
+/* Cache le hamburger sur desktop */
+.hamburger {
+    display: none;
+    position: fixed;
+    top: 12px;
+    left: 12px;
+    z-index: 1001;
+    background: #141414;
+    border: 1px solid rgba(201,168,76,0.3);
+    border-radius: 8px;
+    padding: 8px 10px;
+    cursor: pointer;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.hamburger span {
+    display: block;
+    width: 20px;
+    height: 2px;
+    background: #C9A84C;
+    border-radius: 2px;
+    transition: all 0.3s;
+}
     </style>
 </head>
 <body>
 
 {% if current_user.is_authenticated %}
+
+        <!-- Overlay mobile -->
+    <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
+
+    <!-- Bouton hamburger (visible sur mobile) -->
+    <button class="hamburger" id="hamburger" onclick="toggleSidebar()">
+        <span></span>
+        <span></span>
+        <span></span>
+    </button>
 
     <aside class="sidebar">
     <!-- Brand -->
@@ -300,6 +422,36 @@
             }
         });
     });
+</script>
+<script>
+function toggleSidebar() {
+    const sidebar = document.querySelector('.sidebar');
+    const overlay = document.getElementById('sidebar-overlay');
+    sidebar.classList.toggle('open');
+    overlay.classList.toggle('open');
+}
+
+function closeSidebar() {
+    const sidebar = document.querySelector('.sidebar');
+    const overlay = document.getElementById('sidebar-overlay');
+    sidebar.classList.remove('open');
+    overlay.classList.remove('open');
+}
+
+// Ferme la sidebar quand on clique sur un lien (mobile)
+document.querySelectorAll('.sidebar-nav a').forEach(link => {
+    link.addEventListener('click', () => {
+        if (window.innerWidth <= 768) {
+            closeSidebar();
+        }
+    });
+});
+
+// Ajoute padding-top au main-content sur mobile pour le hamburger
+if (window.innerWidth <= 768) {
+    const main = document.querySelector('.main-content');
+    if (main) main.style.paddingTop = '56px';
+}
 </script>
 </body>
 </html>
