@@ -151,6 +151,7 @@ def project_detail(id):
 
 
 # ─@main.route('/projects/new', methods=['GET', 'POST'])
+@main.route('/projects/new', methods=['GET', 'POST'])
 @login_required
 @teacher_required
 def create_project():
@@ -188,7 +189,6 @@ def create_project():
             domain_fr = domain_input
             domain_en = DOMAIN_FR_TO_EN.get(domain_input, '')
 
-        # Traductions en parallèle
         with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
             future_title = executor.submit(auto_translate, form.title.data)
             future_desc = executor.submit(auto_translate, form.description.data)
