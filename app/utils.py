@@ -1,6 +1,7 @@
 import os
-from dotenv import load_dotenv
-load_dotenv()
+if os.path.exists('.env'):
+    from dotenv import load_dotenv
+    load_dotenv()
 _cache = {}
 DOMAIN_TRANSLATIONS = {
     'Informatique': 'Computer Science',
