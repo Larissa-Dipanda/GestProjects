@@ -102,116 +102,256 @@
         ::-webkit-scrollbar-thumb { background: #DDD; border-radius: 3px; }
 
         /* ── Responsive Mobile ── */
-@media (max-width: 768px) {
+        @media (max-width: 768px) {
 
-    /* Cache la sidebar par défaut sur mobile */
-    .sidebar {
-        transform: translateX(-100%);
-        transition: transform 0.3s ease;
-        z-index: 1000;
-        width: 260px !important;
-    }
+            /* Cache la sidebar par défaut sur mobile */
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+                z-index: 1000;
+                width: 260px !important;
+            }
 
-    .sidebar.open {
-        transform: translateX(0);
-    }
+            .sidebar.open {
+                transform: translateX(0);
+            }
 
-    /* Le contenu prend toute la largeur */
-    .main-content {
-        margin-left: 0 !important;
-        padding: 16px !important;
-        width: 100% !important;
-    }
+            /* Le contenu prend toute la largeur */
+            .main-content {
+                margin-left: 0 !important;
+                padding: 16px !important;
+                width: 100% !important;
+            }
 
-    /* Overlay sombre quand sidebar ouverte */
-    .sidebar-overlay {
-        display: none;
-        position: fixed;
-        inset: 0;
-        background: rgba(0,0,0,0.5);
-        z-index: 999;
-    }
+            /* Overlay sombre quand sidebar ouverte */
+            .sidebar-overlay {
+                display: none;
+                position: fixed;
+                inset: 0;
+                background: rgba(0,0,0,0.5);
+                z-index: 999;
+            }
 
-    .sidebar-overlay.open {
-        display: block;
-    }
+            .sidebar-overlay.open {
+                display: block;
+            }
 
-    /* Bouton hamburger */
-    .hamburger {
-        display: flex !important;
-    }
+            /* Bouton hamburger */
+            .hamburger {
+                display: flex !important;
+            }
 
-    /* Grilles en colonne sur mobile */
-    .row {
-        flex-direction: column;
-    }
+            /* Grilles en colonne sur mobile */
+            .row {
+                flex-direction: column;
+            }
 
-    .col-md-3, .col-md-4, .col-md-6, .col-md-8 {
-        width: 100% !important;
-        max-width: 100% !important;
-        flex: 0 0 100% !important;
-    }
+            .col-md-3, .col-md-4, .col-md-6, .col-md-8 {
+                width: 100% !important;
+                max-width: 100% !important;
+                flex: 0 0 100% !important;
+            }
 
-    /* Stats cards en 2 colonnes */
-    .row.g-3 {
-        display: grid !important;
-        grid-template-columns: 1fr 1fr !important;
-        gap: 10px !important;
-    }
+            /* Stats cards en 2 colonnes */
+            .row.g-3 {
+                display: grid !important;
+                grid-template-columns: 1fr 1fr !important;
+                gap: 10px !important;
+            }
 
-    .stat-card {
-        padding: 14px !important;
-    }
+            .stat-card {
+                padding: 14px !important;
+            }
 
-    .stat-value {
-        font-size: 1.4rem !important;
-    }
+            .stat-value {
+                font-size: 1.4rem !important;
+            }
 
-    /* Page header */
-    .page-header h1 {
-        font-size: 1.4rem !important;
-    }
+            /* Page header */
+            .page-header h1 {
+                font-size: 1.4rem !important;
+            }
 
-    /* Project cards pleine largeur */
-    .project-card {
-        margin-bottom: 12px;
-    }
+            /* Project cards pleine largeur */
+            .project-card {
+                margin-bottom: 12px;
+            }
 
-    /* Tableau de bord */
-    .page-header {
-        margin-bottom: 20px;
-    }
+            /* Tableau de bord */
+            .page-header {
+                margin-bottom: 20px;
+            }
 
-    /* Texte utilisateur tronqué */
-    .user-name {
-        font-size: 0.78rem !important;
-    }
-}
+            /* Texte utilisateur tronqué */
+            .user-name {
+                font-size: 0.78rem !important;
+            }
+        }
 
-/* Cache le hamburger sur desktop */
-.hamburger {
-    display: none;
-    position: fixed;
-    top: 12px;
-    left: 12px;
-    z-index: 1001;
-    background: #141414;
-    border: 1px solid rgba(201,168,76,0.3);
-    border-radius: 8px;
-    padding: 8px 10px;
-    cursor: pointer;
-    flex-direction: column;
-    gap: 4px;
-}
+        /* Cache le hamburger sur desktop */
+        .hamburger {
+            display: none;
+            position: fixed;
+            top: 12px;
+            left: 12px;
+            z-index: 1001;
+            background: #141414;
+            border: 1px solid rgba(201,168,76,0.3);
+            border-radius: 8px;
+            padding: 8px 10px;
+            cursor: pointer;
+            flex-direction: column;
+            gap: 4px;
+        }
 
-.hamburger span {
-    display: block;
-    width: 20px;
-    height: 2px;
-    background: #C9A84C;
-    border-radius: 2px;
-    transition: all 0.3s;
-}
+        .hamburger span {
+            display: block;
+            width: 20px;
+            height: 2px;
+            background: #C9A84C;
+            border-radius: 2px;
+            transition: all 0.3s;
+        }
+        /* ── Auth pages responsive ── */
+        @media (max-width: 768px) {
+
+            /* Login et Register - empile les deux colonnes */
+            .auth-wrapper {
+                flex-direction: column !important;
+                min-height: 100vh;
+            }
+
+            .auth-left {
+                width: 100% !important;
+                padding: 32px 24px !important;
+                min-height: auto !important;
+            }
+
+            /* Cache le grand texte hero sur mobile */
+            .auth-left h1 {
+                font-size: 1.8rem !important;
+            }
+
+            /* Cache les stats sur mobile pour gagner de la place */
+            .auth-left > div > div:last-child {
+                display: none !important;
+            }
+
+            .auth-right {
+                width: 100% !important;
+                padding: 24px 20px !important;
+                min-height: auto !important;
+            }
+
+            .auth-form-box {
+                max-width: 100% !important;
+                width: 100% !important;
+            }
+
+            /* Page d'accueil index.html responsive */
+            .hero-content {
+                flex-direction: column !important;
+                padding: 60px 20px 80px !important;
+                min-height: auto !important;
+                gap: 30px !important;
+            }
+
+            /* Navbar responsive */
+            nav {
+                padding: 12px 20px !important;
+            }
+
+            /* Grille projets - 1 colonne sur mobile */
+            div[style*="grid-template-columns:repeat(auto-fill"] {
+                grid-template-columns: 1fr !important;
+            }
+
+            div[style*="grid-template-columns:repeat(4"] {
+                grid-template-columns: 1fr 1fr !important;
+            }
+
+            div[style*="grid-template-columns:repeat(3"] {
+                grid-template-columns: 1fr !important;
+            }
+
+            /* Stats dashboard - 2 colonnes */
+            div[style*="grid-template-columns:repeat(auto-fit"] {
+                grid-template-columns: 1fr 1fr !important;
+            }
+
+            /* Formulaire create/edit project */
+            div[style*="grid-template-columns:1fr 1fr"] {
+                grid-template-columns: 1fr !important;
+            }
+
+            /* Status cards dans create project */
+            div[style*="grid-template-columns:repeat(4,1fr)"] {
+                grid-template-columns: 1fr 1fr !important;
+            }
+
+            /* Filtres liste projets */
+            form[style*="display:flex"] {
+                flex-direction: column !important;
+            }
+
+            /* Boutons statuts en ligne */
+            form[style*="display:flex; gap:6px"] {
+                flex-wrap: wrap !important;
+            }
+
+            /* Page header */
+            .page-header h1 {
+                font-size: 1.3rem !important;
+            }
+
+            /* Stat cards 2 colonnes */
+            .row.g-3 {
+                display: grid !important;
+                grid-template-columns: 1fr 1fr !important;
+                gap: 10px !important;
+            }
+
+            /* Tables responsive */
+            .table {
+                font-size: 0.75rem !important;
+            }
+
+            /* Candidatures liste */
+            div[style*="justify-content:space-between; align-items:center"] {
+                flex-direction: column !important;
+                align-items: flex-start !important;
+                gap: 10px !important;
+            }
+
+            /* Main content padding */
+            .main-content {
+                padding: 60px 16px 16px !important;
+            }
+
+            /* User info dans sidebar */
+            .user-name {
+                font-size: 0.75rem !important;
+                max-width: 120px;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+        }
+
+        /* Très petit écran */
+        @media (max-width: 400px) {
+            .auth-left h1 {
+                font-size: 1.5rem !important;
+            }
+
+            .stat-value {
+                font-size: 1.2rem !important;
+            }
+
+            .row.g-3 {
+                grid-template-columns: 1fr !important;
+            }
+        }
     </style>
 </head>
 <body>
